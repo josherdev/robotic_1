@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica #2</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e14;
+            --panel-bg: #141923;
+            --border-glow: #232d3f;
+            --text-light: #e2e8f0;
+            --text-muted: #64748b;
+            --space-blue: #00d2ff;
+            --space-pink: #ff2a5f;
+            --space-green: #00ff87;
+            --code-bg: #070a0f;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor de la Presentación */
+        .deck-container {
+            width: 90vw;
+            height: 80vh;
+            max-width: 1200px;
+            max-height: 750px;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--border-glow);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 210, 255, 0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Diapositivas base */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 80px); /* Deja espacio para la barra inferior */
+            padding: 40px 50px;
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            position: relative;
+        }
+
+        /* Encabezados */
+        .slide-header {
+            border-bottom: 2px solid var(--border-glow);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            flex-shrink: 0;
+        }
+
+        .slide-title {
+            margin: 0;
+            font-size: 2.2rem;
+            color: var(--space-blue);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .slide-content {
+            flex-grow: 1;
+        }
+
+        /* Portada Exclusiva */
+        .cover-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .cover-content h1 {
+            font-size: 4rem;
+            margin: 0 0 10px 0;
+            color: var(--space-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+        }
+
+        .cover-content h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin: 0 0 40px 0;
+        }
+
+        .cover-badge-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .badge-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glow);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .bp-blue { color: var(--space-blue); border-color: rgba(0, 210, 255, 0.3); }
+        .bp-pink { color: var(--space-pink); border-color: rgba(255, 42, 95, 0.3); }
+        .bp-green { color: var(--space-green); border-color: rgba(0, 255, 135, 0.3); }
+
+        /* Estructuras de Cuadrícula (Layouts de Diapositivas) */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            color: var(--space-pink);
+        }
+        .card.blue h3 { color: var(--space-blue); }
+        .card.green h3 { color: var(--space-green); }
+
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        ul, ol {
+            padding-left: 22px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 12px;
+        }
+
+        /* Diseño de Tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(0, 210, 255, 0.05);
+            color: var(--space-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-glow);
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        /* Formateo de código */
+        .code-container {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-y: auto;
+            max-height: 380px;
+            margin: 0;
+        }
+
+        .c-kw { color: #ff7b72; font-weight: bold; }
+        .c-bu { color: #d2a8ff; }
+        .c-co { color: #8b949e; font-style: italic; }
+        .c-st { color: #a5d6ff; }
+        .c-nu { color: #79c0ff; }
+
+        /* Controles Inferiores Estilo Dashboard */
+        .navbar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid var(--border-glow);
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+            flex-shrink: 0;
+            height: 80px;
+        }
+
+        .nav-btn {
+            background-color: rgba(255, 255, 255, 0.03);
+            color: var(--text-light);
+            border: 1px solid var(--border-glow);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: rgba(0, 210, 255, 0.1);
+            border-color: var(--space-blue);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .slide-indicator {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        /* Estilo de la caja de desafío */
+        .challenge-box {
+            border-left: 4px solid var(--space-blue);
+            background: rgba(0, 210, 255, 0.02);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 20px;
+        }
+        
+        .challenge-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+            color: var(--space-blue);
+        }
+
+        .logic-list li {
+            margin-bottom: 16px;
+            font-size: 1.15rem;
+        }
+        .logic-list strong {
+            color: var(--space-pink);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="deck-container">
+        
+        <div class="slide active">
+            <div class="cover-content">
+                <h1>Misión: Bio-Garage Cúbico</h1>
+                <h2>Desafío de Ingeniería Mecánica, Electrónica y Programación</h2>
+                <div class="cover-badge-container">
+                    <span class="badge-pill bp-blue">VEX GO Mecánica</span>
+                    <span class="badge-pill bp-pink">Micro:bit Hardware</span>
+                    <span class="badge-pill bp-green">Python</span>
+                </div>
+                <p style="color: var(--text-muted); margin: 0; font-size: 1rem;">Maker STEAM</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">1. El informe de la misión</h2>
+            </div>
+            <div class="slide-content">
+                <div class="card blue" style="margin-bottom: 25px;">
+                    <h3>Año 2045: Colonia de marte</h3>
+                    <p style="font-size: 1.2rem; font-style: italic; margin: 0; color: #f1f5f9;">
+                        "Tu equipo de ingeniería espacial está a cargo del Bio-Garage Cúbico, la estación botánica que alimenta a la colonia humana. Las condiciones climáticas en Marte son extremas. Deben idear un sistema automatizado que vigile los niveles de luz solar, detecte amenazas de aproximación y emita alertas inmediatas."
+                    </p>
+                </div>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Objetivos del proyecto</h3>
+                        <ul>
+                            <li>Edificar la estructura y los soportes utilizando el kit modular VEX GO.</li>
+                            <li>Instalar y conectar la matriz eléctrica usando la BBC micro:bit.</li>
+                            <li>Programar los algoritmos lógicos de control en Python.</li>
+                        </ul>
+                    </div>
+                    <div class="card green">
+                        <h3>Trabajo en equipo</h3>
+                        <p style="margin-top: 5px;">
+                            Trabajarán como un laboratorio aeroespacial real: dividiendo roles de diseñadores mecánicos, técnicos de cableado y arquitectos de software. Todo el hardware debe funcionar de manera integrada y sincronizada.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">2. Estructura física con VEX GO</h2>
+            </div>
+            <div class="slide-content">
+                <p style="margin-top: 0; margin-bottom: 20px;">El garage requiere una infraestructura física robusta y ordenada antes de acoplar e interconectar los componentes electrónicos.</p>
+                <div class="grid-2">
+                    <div class="card green">
+                        <h3>Pautas de construcción</h3>
+                        <ol>
+                            <li><strong>Estabilidad estructural:</strong> Diseñar muros perimetrales estables capaces de la propia estructura y materiales sin tambalearse.</li>
+                            <li><strong>Bahía de control protegida:</strong> Crear un espacio central específico con vigas VEX para encastrar la micro:bit y evitar caídas accidentales.</li>
+                            <li><strong>Canalización limpia:</strong> Utilizar los orificios de las piezas para guiar los cables hacia abajo, previniendo desconexiones bruscas.</li>
+                        </ol>
+                    </div>
+                    <div class="card">
+                        <h3>Piezas clave sugeridas</h3>
+                        <ul>
+                            <li><strong>Placas base grandes:</strong> Suelo y cimientos del domo.</li>
+                            <li><strong>Viguería y conectores de ángulo:</strong> Elevación y armado de los pilares del invernadero.</li>
+                            <li><strong>Articulaciones:</strong> Debe existir una puerta articulada que permita manterner el garage protegido.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">3. El desafío de programación</h2>
+            </div>
+            <div class="slide-content">
+                <div class="challenge-box">
+                    <h3>El desafío de programación (Microbit Python Editor)</h3>
+                    <p style="font-size: 1.15rem; margin-top: 0;">
+                        Los alumnos escribirán el código en el editor de Python de micro:bit. El programa debe ejecutar un bucle infinito que evalúe las condiciones del entorno.
+                    </p>
+                </div>
+                
+                <div class="card green">
+                    <h3 style="color: var(--space-green); margin-bottom: 10px;">La lógica que deben programar:</h3>
+                    <ul class="logic-list">
+                        <li>Si es <strong>"de noche"</strong> (lectura de la fotoresistencia baja), la micro:bit debe mostrar el ícono ASLEEP en su pantalla LED.</li>
+                        <li>Si el <strong>sensor IR detecta presencia</strong> (lectura analógica alta por rebote de luz IR), el LED rojo debe parpadear y la pantalla mostrar el icono STICKFIGURE.</li>
+                        <li>Si <strong>todo está en orden</strong> (hay luz y no hay intrusos), el LED verde se mantiene encendido y la pantalla muestra el ícono TARGET.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">4. Fase electrónica: Circuito del garage</h2>
+            </div>
+            <div class="slide-content">
+                <p style="margin-top: 0; margin-bottom: 20px;">Los sensores de la estación deben conectarse directamente a los pines analógicos y digitales de la micro:bit:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente de la estación</th>
+                            <th>Tipo de señal</th>
+                            <th>Pin asignado</th>
+                            <th>Misión en el Bio-Garage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fotoresistencia (LDR)</strong></td>
+                            <td><span style="color: var(--space-blue); font-weight: bold;">Entrada analógica</span></td>
+                            <td><code>Pin 0</code></td>
+                            <td>Mide la luz ambiental (Detecta ciclos de día y noche en Marte).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sensor infrarrojo analógico</strong></td>
+                            <td><span style="color: var(--space-blue); font-weight: bold;">Entrada Analógica</span></td>
+                            <td><code>Pin 1</code></td>
+                            <td>Detecta meteoros, intrusos o astronautas cerca del acceso.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diodo LED Verde</strong></td>
+                            <td><span style="color: var(--space-green); font-weight: bold;">Salida Digital</span></td>
+                            <td><code>Pin 2</code></td>
+                            <td>Luz de baliza: Indica que el garage está seguro, estable y operativo.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diodo LED Rojo</strong></td>
+                            <td><span style="color: var(--space-pink); font-weight: bold;">Salida Digital</span></td>
+                            <td><code>Pin 8</code></td>
+                            <td>Luz de alarma: Destella inmediatamente ante situaciones de peligro crítico.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+		<div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">4. Fase electrónica: Circuito del garage</h2>
+            </div>
+            <div class="slide-content">
+                <p style="margin-top: 0; margin-bottom: 20px;">Los sensores de la estación deben conectarse directamente a los pines analógicos y digitales de la micro:bit:</p>
+
+				<img src="circuito.png" alt="circuito" width="1000" heigth="1000" style="display: block; margin: 0 auto;">
+                
+            </div>
+        </div>
+
+		
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">5. Calibración y evaluación técnico-creativa</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>El secreto: La calibración</h3>
+                        <p style="margin-top: 5px; font-size: 1rem;">
+                            Las lecturas que devuelven los sensores analógicos cambian constantemente dependiendo del rebote de la luz en las paredes o la iluminación de las lámparas de la sala de clase.
+                        </p>
+                        <p style="font-size: 1rem;">
+                            Los equipos deberán abrir el monitor en serie en el editor de Python, usar comandos de salida visual (<code>print(nivel_luz)</code>) para examinar las lecturas del hardware en vivo y ajustar los valores numéricos de las constantes en el script mediante ensayo y error.
+                        </p>
+                    </div>
+                    <div class="card blue">
+                        <h3>Rúbrica de la auditoría</h3>
+                        <ul style="font-size: 1rem;">
+                            <li><strong>Ingeniería mecánica (30%):</strong> Rigidez y estabilidad del chasis modular VEX GO y protección segura para la electrónica.</li>
+                            <li><strong>Estructura eléctrica (30%):</strong> Cableado limpio, seguro, funcional y mapeado a los pines correctos.</li>
+                            <li><strong>Arquitectura de software (40%):</strong> Ejecución perfecta del flujo, respeto por las prioridades lógicas e implementación de los "Desafíos de Código".</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">6. Algoritmo base en Python</h2>
+            </div>
+            <div class="slide-content">
+                <div class="grid-2">
+                    <div>
+                        <p style="margin-top: 0;">Este programa establece la lógica de control secuencial y las prioridades de eventos que gobernarán la estación mediante un bucle infinito.</p>
+                        <div class="card blue" style="padding: 15px;">
+                            <h4 style="margin: 0 0 8px 0; color: var(--space-blue);">Análisis de prioridades:</h4>
+                            <ul style="margin: 0; padding-left: 18px; font-size: 0.95rem;">
+                                <li><strong>Prioridad 1:</strong> Seguridad (Infrarrojo). La amenaza de intrusión bloquea y detiene cualquier otra lectura.</li>
+                                <li><strong>Prioridad 2:</strong> Climatización (Luz). Si la seguridad está en orden, pasa a evaluar si es de noche.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <pre class="code-container">
+<span class="c-kw">from</span> microbit <span class="c-kw">import</span> *
+
+<span class="c-co"># Calibración inicial de umbrales</span>
+nivel_luz = 0
+proximidad = 0
+							
+<span class="c-kw">while</span> <span class="c-bu">True</span>:
+    nivel_luz = pin0.read_analog()
+    proximidad = pin1.read_analog()
+    
+    <span class="c-kw">if</span> proximidad < 100:
+        <span class="c-co"># ALERTA DE SEGURIDAD INTERMITENTE</span>
+        display.show(Image.STICKFIGURE)
+        pin8.write_digital(<span class="c-nu">1</span>)  <span class="c-co"># LED Rojo ON</span>
+        pin2.write_digital(<span class="c-nu">0</span>)  <span class="c-co"># LED Verde OFF</span>
+        sleep(<span class="c-nu">200</span>)
+        pin8.write_digital(<span class="c-nu">0</span>)  <span class="c-co"># Efecto Destello</span>
+        sleep(<span class="c-nu">200</span>)
+    <span class="c-kw">elif</span> nivel_luz < 300:
+        <span class="c-co"># MODALIDAD NOCHE</span>
+        display.show(Image.ASLEEP)
+        pin2.write_digital(<span class="c-nu">1</span>)  <span class="c-co"># LED Verde ON</span>
+        pin8.write_digital(<span class="c-nu">0</span>)
+    <span class="c-kw">else</span>:
+        <span class="c-co"># ESTADO ESTABLE DIURNO</span>
+        display.show(Image.TARGET)
+        pin2.write_digital(<span class="c-nu">1</span>)
+        pin8.write_digital(<span class="c-nu">0</span>)
+        
+    sleep(<span class="c-nu">100</span>)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navbar-controls">
+            <button class="nav-btn" id="prevBtn" disabled>◀ Anterior</button>
+            <div class="slide-indicator" id="slideIndicator">DIAPOSITIVA 1 de 8</div>
+            <button class="nav-btn" id="nextBtn">Siguiente ▶</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Lógica de control y transiciones dinámicas para las diapositivas
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideIndicator = document.getElementById('slideIndicator');
+        
+        let currentIdx = 0;
+
+        function updateSlideView() {
+            slides.forEach((slide, idx) => {
+                if (idx === currentIdx) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Control de habilitación de botones de navegación
+            prevBtn.disabled = (currentIdx === 0);
+            nextBtn.disabled = (currentIdx === slides.length - 1);
+
+            // Actualizar string de control numérico de páginas
+            slideIndicator.textContent = `DIAPOSITIVA ${currentIdx + 1} DE ${slides.length}`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIdx > 0) {
+                currentIdx--;
+                updateSlideView();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIdx < slides.length - 1) {
+                currentIdx++;
+                updateSlideView();
+            }
+        });
+
+        // Soporte nativo para pasar páginas usando las teclas de flechas izquierda y derecha
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' && currentIdx < slides.length - 1) {
+                currentIdx++;
+                updateSlideView();
+            } else if (event.key === 'ArrowLeft' && currentIdx > 0) {
+                currentIdx--;
+                updateSlideView();
+            }
+        });
+    </script>
+</body>
+</html>
